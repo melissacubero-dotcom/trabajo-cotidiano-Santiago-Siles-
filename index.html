@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarea #3 — Cuaderno interactivo: Fórmulas notables y operaciones combinadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#F1F0F5;--paper-line:#E1DEEA;--ink:#211B2E;--ink-soft:#5B5470;
+    --accent:#7C5CBF;--accent-soft:#EAE1F7;--card:#FFFFFF;--slate:#2B2440;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:repeating-linear-gradient(135deg, var(--paper-line) 0 1px, transparent 1px 22px), var(--paper);
+    font-family:'Inter',sans-serif;color:var(--ink);padding:28px 18px 70px;min-height:100vh;
+  }
+  .wrap{max-width:940px;margin:0 auto;}
+
+  .progress-wrap{position:fixed;left:0;bottom:0;width:100%;background:#fff;border-top:1px solid #E4E0EE;padding:9px 18px 10px;z-index:50;box-shadow:0 -6px 16px -10px rgba(33,27,46,.25);}
+  .progress-track{height:8px;max-width:940px;margin:0 auto 6px;background:#EAE6F2;border-radius:999px;overflow:hidden;}
+  .progress-fill{height:100%;width:33.3%;background:var(--accent);transition:width .3s ease;}
+  .progress-label{max-width:940px;margin:0 auto;text-align:center;font-size:12px;color:var(--ink-soft);}
+
+  .top-banner{background:linear-gradient(135deg,#211B2E,#3A2E5C);color:#fff;border-radius:16px;padding:24px 28px;margin-bottom:22px;box-shadow:0 18px 40px -22px rgba(33,27,46,.5);}
+  .task-pill{display:inline-block;background:#7C5CBF;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:999px;margin-bottom:10px;}
+  .top-banner h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(21px,3.2vw,29px);font-weight:600;margin:0 0 8px;line-height:1.15;}
+  .top-banner .sub{margin:0 0 10px;font-size:15px;opacity:.92;}
+  .top-banner .authors{margin:0;font-size:13px;opacity:.72;}
+
+  .binder{display:flex;background:var(--card);border-radius:18px;box-shadow:0 18px 40px -22px rgba(33,27,46,.35);overflow:hidden;border:1px solid #E9E5F1;}
+  .spiral{flex:0 0 34px;background:repeating-linear-gradient(180deg, transparent 0 18px, #EEEAF6 18px 20px);position:relative;border-right:1px dashed #D8D2E6;}
+  .spiral span{position:absolute;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid #C4BAD8;}
+  .card-body{flex:1;min-width:0;padding:26px 30px 34px;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:2px solid #ECE7F5;flex-wrap:wrap;}
+  .tab-btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;background:#F5F3FA;color:var(--ink-soft);border:1px solid #ECE7F5;border-bottom:none;padding:10px 18px 12px;border-radius:12px 12px 0 0;cursor:pointer;transform:translateY(2px);transition:transform .15s ease,color .15s ease,background .15s ease;}
+  .tab-btn:hover{color:var(--ink);}
+  .tab-btn.active{background:var(--card);color:var(--accent);border-color:#ECE7F5;transform:translateY(0);box-shadow:0 -2px 0 var(--accent) inset;}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .lead{color:var(--ink-soft);font-size:14.5px;line-height:1.6;margin:0 0 22px;max-width:66ch;}
+  .lead b{color:var(--ink);}
+  .rubric-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:22px;margin:0 0 6px;color:var(--ink);border-bottom:2px solid var(--accent);padding-bottom:8px;}
+
+  .feedback-box{border-left:4px solid var(--accent);background:#F7F3FC;border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:10px;font-size:13.5px;line-height:1.55;color:var(--ink);}
+  .feedback-box b{color:var(--accent);}
+
+  .formula-strip{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 20px;}
+  .formula-chip{flex:1;min-width:220px;background:#F5F3FA;border:1px solid #ECE7F5;border-radius:12px;padding:14px 16px;text-align:center;}
+  .formula-chip .name{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:700;margin-bottom:6px;}
+  .formula-chip .tex{font-size:16px;color:var(--accent);}
+
+  .student-hint{font-size:13.5px;color:var(--ink-soft);margin:0 0 8px;}
+  .student-hint b{color:var(--ink);}
+  .student-bar{display:flex;flex-wrap:wrap;gap:14px;background:#F5F3FA;border:1px solid #ECE7F5;border-radius:12px;padding:12px 16px;margin-bottom:20px;}
+  .student-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px;}
+  .student-field label{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600;}
+  .student-field input,.student-field select{border:1.5px solid #DED7EC;border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;}
+  .student-field input:focus,.student-field select:focus{outline:none;border-color:var(--accent);}
+  .student-field.section-field{max-width:200px;}
+
+  .qcard{border:1px solid #ECE7F5;border-radius:14px;padding:18px 20px 20px;margin-bottom:16px;background:#FCFBFE;}
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .qnum{font-family:'Space Grotesk',sans-serif;font-weight:600;width:28px;height:28px;border-radius:50%;background:var(--slate);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;flex:0 0 auto;}
+  .qmeta{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600;}
+  .qprompt{font-size:15.5px;line-height:1.55;margin:0 0 14px;color:var(--ink);}
+
+  .opts{display:flex;flex-direction:column;gap:8px;}
+  .opt{display:flex;align-items:center;gap:10px;border:1.5px solid #E4DFF0;border-radius:10px;padding:10px 12px;cursor:pointer;background:#fff;font-size:14.5px;transition:border-color .12s ease,background .12s ease;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.selected{border-color:var(--accent);background:var(--accent-soft);}
+  .opt input{accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto;}
+
+  .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .btn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;border:none;border-radius:10px;padding:12px 22px;cursor:pointer;background:var(--accent);color:#fff;transition:filter .12s ease;}
+  .btn:hover{filter:brightness(1.06);}
+  .btn.secondary{background:#F1EDF9;color:var(--ink);border:1px solid #E4DFF0;}
+  .btn:disabled{background:#D2CBE0;cursor:not-allowed;}
+
+  .notice{border:1.5px dashed #D2CBE0;border-radius:12px;padding:26px 20px;text-align:center;color:var(--ink-soft);font-size:14.5px;}
+
+  .score-hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;background:linear-gradient(135deg,#211B2E,#3A2E5C);color:#fff;border-radius:16px;padding:22px 26px;margin-bottom:22px;}
+  .score-ring{position:relative;width:96px;height:96px;flex:0 0 auto;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:19px;}
+  .score-text h2{font-family:'Space Grotesk',sans-serif;margin:0 0 4px;font-size:20px;}
+  .score-text p{margin:0;font-size:13.5px;opacity:.85;}
+
+  table.rubric{width:100%;border-collapse:collapse;font-size:13.3px;margin-top:6px;}
+  table.rubric th,table.rubric td{border:1px solid #ECE7F5;padding:10px;text-align:left;vertical-align:top;line-height:1.45;}
+  table.rubric th{background:#211B2E;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.8px;}
+  table.rubric td.crit{font-weight:600;background:#F5F3FA;width:19%;}
+  table.rubric td.level0{background:#FBE1E1;}
+  table.rubric td.level1{background:#FCEFD8;}
+  table.rubric td.level2{background:#FFF6D9;}
+  table.rubric td.level3{background:#DCF3E8;}
+  table.rubric td.pts{width:9%;text-align:center;font-family:'Space Grotesk',sans-serif;font-weight:600;}
+  .achieved{outline:3px solid var(--accent);outline-offset:-3px;position:relative;}
+  .achieved::after{content:"✓ obtenido";position:absolute;top:4px;right:6px;font-size:10px;font-weight:700;color:var(--accent);}
+  .total-row td{background:#211B2E !important;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;}
+
+  .itemres{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px;}
+  .itemchip{font-size:12.5px;font-weight:600;border-radius:999px;padding:6px 12px;border:1px solid;}
+  .itemchip.ok{background:#DCF3E8;border-color:#9FD8BC;color:#1E6B49;}
+  .itemchip.bad{background:#FBE1E1;border-color:#EDB0B0;color:#8E2B2B;}
+
+  .footnote{color:var(--ink-soft);font-size:12.5px;margin-top:18px;line-height:1.6;}
+  @media (max-width:640px){.card-body{padding:20px 16px 28px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top-banner">
+    <span class="task-pill">Tarea #3</span>
+    <h1>Cuaderno Interactivo — Fórmulas notables y operaciones combinadas</h1>
+    <p class="sub">Monomios y polinomios · Fórmulas notables · Operaciones combinadas · Valor numérico</p>
+    <p class="authors">MSc. Sarita Melissa Cubero Solano</p>
+  </div>
+
+  <div class="binder">
+    <div class="spiral" id="spiral"></div>
+    <div class="card-body">
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="rubrica">📋 Rúbrica</button>
+        <button class="tab-btn" data-tab="resultados">📊 Resultados</button>
+        <button class="tab-btn" data-tab="ejercicios">📝 Selección única</button>
+      </div>
+
+      <!-- RÚBRICA -->
+      <div class="panel active" id="panel-rubrica">
+        <h2 class="rubric-title">Rúbrica de evaluación — Tarea #3</h2>
+        <p class="lead">Esta rúbrica describe los criterios con los que se evalúa el desempeño del estudiante en el cuestionario de selección única sobre las <b>monomios, polinomios, fórmulas notables, operaciones combinadas y valor numérico</b>. La columna resaltada se completa automáticamente según las respuestas del estudiante; puede descargarse en PDF para entregarla impresa a la docente. Valor total: <b>24 puntos</b> (6 criterios × 4 puntos).</p>
+
+        <div class="formula-strip">
+          <div class="formula-chip">
+            <div class="name">Cuadrado de una suma</div>
+            <div class="tex">$(a+b)^{2}=a^{2}+2ab+b^{2}$</div>
+          </div>
+          <div class="formula-chip">
+            <div class="name">Cuadrado de una diferencia</div>
+            <div class="tex">$(a-b)^{2}=a^{2}-2ab+b^{2}$</div>
+          </div>
+          <div class="formula-chip">
+            <div class="name">Diferencia de cuadrados</div>
+            <div class="tex">$(a+b)(a-b)=a^{2}-b^{2}$</div>
+          </div>
+        </div>
+
+        <p class="student-hint">✏️ El estudiante debe escribir su <b>nombre completo</b> y seleccionar su <b>sección</b> antes de calificar el cuaderno.</p>
+        <div class="student-bar">
+          <div class="student-field">
+            <label for="input-nombre">Nombre del estudiante</label>
+            <input type="text" id="input-nombre" placeholder="Nombre completo del estudiante">
+          </div>
+          <div class="student-field section-field">
+            <label for="input-seccion">Sección</label>
+            <select id="input-seccion">
+              <option value="" disabled selected>Seleccione su sección</option>
+              <option value="8-1">8-1</option>
+              <option value="8-2">8-2</option>
+              <option value="8-3">8-3</option>
+              <option value="8-4">8-4</option>
+              <option value="8-5">8-5</option>
+              <option value="8-6">8-6</option>
+              <option value="8-7">8-7</option>
+              <option value="8-8">8-8</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="rubrica-static"></div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="panel" id="panel-resultados">
+        <div id="resultados-content">
+          <div class="notice">El estudiante debe responder los 18 ítems en la pestaña <b>Selección única</b> y presionar «Calificar cuaderno» para ver aquí su puntaje, el resultado de cada ítem y la rúbrica evaluada.</div>
+        </div>
+        <div class="actions" id="resultados-actions" style="display:none;">
+          <button class="btn secondary" id="btn-pdf">⬇️ Descargar PDF</button>
+        </div>
+      </div>
+
+      <!-- EJERCICIOS -->
+      <div class="panel" id="panel-ejercicios">
+        <p class="lead"><b>Indicaciones:</b> el estudiante debe leer cada ítem con cuidado y seleccionar la única opción correcta. Los ejercicios están ordenados de menor a mayor complejidad: primero monomios y polinomios, luego las fórmulas notables, después las operaciones combinadas con coeficientes y factorización, y por último el valor numérico. Al terminar, debe presionar <b>«Calificar cuaderno»</b> para ver sus resultados y la rúbrica evaluada.</p>
+        <div id="questions"></div>
+        <div class="actions">
+          <button class="btn secondary" id="btn-clear">Borrar respuestas</button>
+          <button class="btn" id="btn-grade">Calificar cuaderno</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="footnote">Tarea #3 — Cuaderno generado para uso docente sobre la unidad «Monomios, polinomios, fórmulas notables, operaciones combinadas y valor numérico». Los ejercicios son de elaboración propia.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="progress-label" id="progress-label">Progreso: 1/3 pestañas visitadas</div>
+</div>
+
+<script>
+/* ---------- decorative spiral dots ---------- */
+(function(){
+  const s=document.getElementById('spiral');
+  for(let i=0;i<26;i++){
+    const dot=document.createElement('span');
+    dot.style.top=(20+i*30)+'px';
+    s.appendChild(dot);
+  }
+})();
+
+/* ---------- question bank ---------- */
+/* skill 1: fórmulas notables (desarrollo directo)
+   skill 2: operaciones combinadas con suma y resta de productos notables
+   skill 3: operaciones combinadas con coeficientes, productos notables y factorización */
+const questions = [
+  /* --- Criterio 1: monomios --- */
+  { id:1, skill:1, diff:'Inicial', prompt:'El resultado de $(3x^{2})(4x^{3})$ es:',
+    options:[{key:'A',text:'$12x^{5}$'},{key:'B',text:'$7x^{5}$'},{key:'C',text:'$12x^{6}$'}], correct:'A' },
+  { id:2, skill:1, diff:'Intermedio', prompt:'El resultado de $\\dfrac{18x^{5}y^{2}}{6x^{2}y}$ es:',
+    options:[{key:'A',text:'$12x^{3}y$'},{key:'B',text:'$3x^{3}y$'},{key:'C',text:'$3x^{7}y^{3}$'}], correct:'B' },
+  { id:3, skill:1, diff:'Intermedio', prompt:'El resultado de $(2x^{2}y)^{3}$ es:',
+    options:[{key:'A',text:'$6x^{6}y^{3}$'},{key:'B',text:'$8x^{5}y^{3}$'},{key:'C',text:'$8x^{6}y^{3}$'}], correct:'C' },
+
+  /* --- Criterio 2: polinomios --- */
+  { id:4, skill:2, diff:'Inicial', prompt:'Al sumar $(3x^{2}+2x-5)+(x^{2}-4x+7)$ se obtiene:',
+    options:[{key:'A',text:'$4x^{2}+6x+2$'},{key:'B',text:'$4x^{2}-2x+2$'},{key:'C',text:'$4x^{2}-2x+12$'}], correct:'B' },
+  { id:5, skill:2, diff:'Intermedio', prompt:'Al restar $(5x^{2}-3x+1)-(2x^{2}-x+4)$ se obtiene:',
+    options:[{key:'A',text:'$3x^{2}-4x-3$'},{key:'B',text:'$3x^{2}-2x+5$'},{key:'C',text:'$3x^{2}-2x-3$'}], correct:'C' },
+  { id:6, skill:2, diff:'Avanzado', prompt:'El resultado de $(x+3)(x^{2}-2x+1)$ es:',
+    options:[{key:'A',text:'$x^{3}+x^{2}-5x+3$'},{key:'B',text:'$x^{3}+x^{2}-5x-3$'},{key:'C',text:'$x^{3}+x^{2}+x+3$'}], correct:'A' },
+
+  /* --- Criterio 3: fórmulas notables --- */
+  { id:7, skill:3, diff:'Inicial', prompt:'El resultado de $(3x-1)^{2}$ es:',
+    options:[{key:'A',text:'$9x^{2}-1$'},{key:'B',text:'$3x^{2}-6x+1$'},{key:'C',text:'$9x^{2}-6x+1$'}], correct:'C' },
+  { id:8, skill:3, diff:'Intermedio', prompt:'El resultado de $(2a+5b)^{2}$ es:',
+    options:[{key:'A',text:'$4a^{2}+10ab+25b^{2}$'},{key:'B',text:'$4a^{2}+20ab+25b^{2}$'},{key:'C',text:'$2a^{2}+20ab+5b^{2}$'}], correct:'B' },
+  { id:9, skill:3, diff:'Intermedio', prompt:'El resultado de $(4x+3)(4x-3)$ es:',
+    options:[{key:'A',text:'$16x^{2}-9$'},{key:'B',text:'$16x^{2}-6$'},{key:'C',text:'$4x^{2}-9$'}], correct:'A' },
+
+  /* --- Criterio 4: combinadas suma y resta --- */
+  { id:10, skill:4, diff:'Intermedio', prompt:'Al simplificar $(x+3)^{2}+(x-3)^{2}$ se obtiene:',
+    options:[{key:'A',text:'$2x^{2}+9$'},{key:'B',text:'$2x^{2}+12x+18$'},{key:'C',text:'$2x^{2}+18$'}], correct:'C' },
+  { id:11, skill:4, diff:'Intermedio', prompt:'Al simplificar $(x+5)^{2}-(x-5)^{2}$ se obtiene:',
+    options:[{key:'A',text:'$20x$'},{key:'B',text:'$50$'},{key:'C',text:'$2x^{2}+50$'}], correct:'A' },
+  { id:12, skill:4, diff:'Avanzado', prompt:'Al simplificar $(x+4)(x-4)+(x+2)^{2}$ se obtiene:',
+    options:[{key:'A',text:'$2x^{2}+4x+20$'},{key:'B',text:'$2x^{2}+4x-12$'},{key:'C',text:'$2x^{2}-12$'}], correct:'B' },
+
+  /* --- Criterio 5: combinadas con coeficientes y factorización --- */
+  { id:13, skill:5, diff:'Intermedio', prompt:'Al simplificar $(x-2)^{2}-(x+1)(x-1)$ se obtiene:',
+    options:[{key:'A',text:'$-4x+3$'},{key:'B',text:'$2x^{2}-4x+5$'},{key:'C',text:'$-4x+5$'}], correct:'C' },
+  { id:14, skill:5, diff:'Avanzado', prompt:'Al simplificar $3(x+2)^{2}-2(x-1)^{2}$ se obtiene:',
+    options:[{key:'A',text:'$x^{2}+16x+10$'},{key:'B',text:'$x^{2}+8x+10$'},{key:'C',text:'$x^{2}+16x+14$'}], correct:'A' },
+  { id:15, skill:5, diff:'Avanzado', prompt:'La factorización de $(x-3)^{2}-25$ corresponde a:',
+    options:[{key:'A',text:'$(x-5)(x+5)$'},{key:'B',text:'$(x-8)(x+2)$'},{key:'C',text:'$(x-28)(x+22)$'}], correct:'B' },
+
+  /* --- Criterio 6: valor numérico --- */
+  { id:16, skill:6, diff:'Inicial', prompt:'El valor numérico de $3x^{2}-2x+5$ para $x=2$ es:',
+    options:[{key:'A',text:'$37$'},{key:'B',text:'$13$'},{key:'C',text:'$3$'}], correct:'B' },
+  { id:17, skill:6, diff:'Intermedio', prompt:'El valor numérico de $2x^{2}+5x-1$ para $x=-3$ es:',
+    options:[{key:'A',text:'$32$'},{key:'B',text:'$-34$'},{key:'C',text:'$2$'}], correct:'C' },
+  { id:18, skill:6, diff:'Avanzado', prompt:'El valor numérico de $(a+b)^{2}-(a-b)^{2}$ para $a=3$ y $b=-2$ es:',
+    options:[{key:'A',text:'$-24$'},{key:'B',text:'$24$'},{key:'C',text:'$26$'}], correct:'A' }
+];
+
+const skillNames = {
+  1:'El estudiante realiza operaciones con monomios (multiplicación, división y potencia)',
+  2:'El estudiante realiza operaciones con polinomios (suma, resta y multiplicación)',
+  3:'El estudiante desarrolla las fórmulas notables: cuadrado de una suma, cuadrado de una diferencia y diferencia de cuadrados',
+  4:'El estudiante resuelve operaciones combinadas de suma y resta de productos notables',
+  5:'El estudiante resuelve operaciones combinadas con coeficientes, productos notables y factorización',
+  6:'El estudiante calcula el valor numérico de expresiones algebraicas y de productos notables'
+};
+const skillShort = {
+  1:'Operaciones con monomios',
+  2:'Operaciones con polinomios',
+  3:'Fórmulas notables',
+  4:'Operaciones combinadas (suma y resta)',
+  5:'Combinadas con coeficientes y factorización',
+  6:'Valor numérico'
+};
+
+const rubricRows = [
+  { skill:1, name:skillNames[1],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante opera de forma incorrecta los monomios en la mayoría de los ítems.',
+    d2:'El estudiante opera parcialmente (con errores en coeficientes o exponentes) los monomios en la mayoría de los ítems.',
+    d3:'El estudiante opera correctamente los monomios en todos los ítems.',
+    tip:'El estudiante debe repasar las leyes de los exponentes: al multiplicar se suman los exponentes ($x^{m}\\cdot x^{n}=x^{m+n}$), al dividir se restan y al elevar una potencia se multiplican, sin olvidar operar también los coeficientes.' },
+  { skill:2, name:skillNames[2],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante opera de forma incorrecta los polinomios en la mayoría de los ítems.',
+    d2:'El estudiante opera parcialmente (con errores de signos o al reducir términos semejantes) los polinomios en la mayoría de los ítems.',
+    d3:'El estudiante opera correctamente los polinomios en todos los ítems.',
+    tip:'El estudiante debe cambiar todos los signos del polinomio que se resta, multiplicar cada término del primer factor por cada término del segundo y reducir solo los términos semejantes.' },
+  { skill:3, name:skillNames[3],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante desarrolla de forma incorrecta las fórmulas notables en la mayoría de los ítems.',
+    d2:'El estudiante desarrolla parcialmente (con errores de procedimiento) las fórmulas notables en la mayoría de los ítems.',
+    d3:'El estudiante desarrolla correctamente las tres fórmulas notables en todos los ítems.',
+    tip:'El estudiante debe repasar que $(a+b)^{2}=a^{2}+2ab+b^{2}$, $(a-b)^{2}=a^{2}-2ab+b^{2}$ y $(a+b)(a-b)=a^{2}-b^{2}$, recordando elevar al cuadrado el coeficiente completo de cada término.' },
+  { skill:4, name:skillNames[4],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante resuelve de forma incorrecta las operaciones combinadas de suma y resta de productos notables en la mayoría de los ítems.',
+    d2:'El estudiante resuelve parcialmente (con errores al desarrollar o al reducir términos semejantes) las operaciones combinadas en la mayoría de los ítems.',
+    d3:'El estudiante resuelve correctamente las operaciones combinadas de suma y resta de productos notables en todos los ítems.',
+    tip:'El estudiante debe desarrollar cada producto notable por separado, escribir el segundo entre paréntesis cuando se resta (para cambiar todos sus signos) y luego reducir los términos semejantes.' },
+  { skill:5, name:skillNames[5],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante resuelve de forma incorrecta las operaciones con coeficientes o la factorización en la mayoría de los ítems.',
+    d2:'El estudiante resuelve parcialmente (con errores de signos, coeficientes o factorización) las operaciones en la mayoría de los ítems.',
+    d3:'El estudiante resuelve correctamente las operaciones con coeficientes, los productos notables combinados y la factorización en todos los ítems.',
+    tip:'El estudiante debe multiplicar primero el coeficiente por el resultado completo del producto notable, cuidar los signos al restar y, para factorizar, identificar la diferencia de cuadrados $A^{2}-B^{2}=(A+B)(A-B)$ con $A$ y $B$ expresiones completas.' },
+  { skill:6, name:skillNames[6],
+    d0:'El estudiante no responde.',
+    d1:'El estudiante calcula de forma incorrecta el valor numérico de las expresiones en la mayoría de los ítems.',
+    d2:'El estudiante calcula parcialmente (con errores al sustituir, con los signos o con el orden de las operaciones) el valor numérico en la mayoría de los ítems.',
+    d3:'El estudiante calcula correctamente el valor numérico de las expresiones en todos los ítems.',
+    tip:'El estudiante debe sustituir la variable entre paréntesis (sobre todo si es negativa), calcular primero las potencias, luego los productos y al final las sumas y restas.' }
+];
+
+let selected = {};
+
+/* ---------- render questions ---------- */
+const qContainer = document.getElementById('questions');
+questions.forEach(q=>{
+  const card = document.createElement('div');
+  card.className='qcard';
+  const optsHtml = `<div class="opts">${q.options.map(o=>`
+    <label class="opt" data-q="${q.id}" data-k="${o.key}">
+      <input type="radio" name="q${q.id}" value="${o.key}">
+      <span>${o.key}) ${o.text}</span>
+    </label>`).join('')}</div>`;
+  card.innerHTML = `
+    <div class="qhead">
+      <div class="qnum">${q.id}</div>
+      <div class="qmeta">${q.diff} · ${skillShort[q.skill]}</div>
+    </div>
+    <p class="qprompt">${q.prompt}</p>
+    ${optsHtml}
+  `;
+  qContainer.appendChild(card);
+});
+
+qContainer.addEventListener('change', e=>{
+  if(e.target.type==='radio'){
+    const qid = parseInt(e.target.name.replace('q',''));
+    const val = e.target.value;
+    selected[qid]=val;
+    document.querySelectorAll(`.opt[data-q="${qid}"]`).forEach(el=>{
+      el.classList.toggle('selected', el.getAttribute('data-k')===val);
+    });
+  }
+});
+
+document.getElementById('btn-clear').addEventListener('click', ()=>{
+  selected = {};
+  document.querySelectorAll('.opt input[type=radio]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.opt.selected').forEach(el=>el.classList.remove('selected'));
+});
+
+/* ---------- tabs + progress ---------- */
+const visitedTabs = new Set(['rubrica']);
+function updateProgress(){
+  const total = document.querySelectorAll('.tab-btn').length;
+  const visited = visitedTabs.size;
+  document.getElementById('progress-fill').style.width = (visited/total*100)+'%';
+  document.getElementById('progress-label').textContent = `Progreso: ${visited}/${total} pestañas visitadas`;
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    visitedTabs.add(btn.dataset.tab);
+    updateProgress();
+    if(window.renderMathInElement){
+      renderMathInElement(document.getElementById('panel-'+btn.dataset.tab), {
+        delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]
+      });
+    }
+  });
+});
+updateProgress();
+
+/* ---------- grading ---------- */
+document.getElementById('btn-grade').addEventListener('click', ()=>{
+  const nombre = document.getElementById('input-nombre').value.trim();
+  const seccion = document.getElementById('input-seccion').value.trim();
+  if(!nombre || !seccion){
+    alert('El estudiante debe completar su nombre y su sección antes de calificar el cuaderno.');
+    if(!nombre) document.getElementById('input-nombre').focus();
+    else document.getElementById('input-seccion').focus();
+    return;
+  }
+  const missing = questions.filter(q=>!selected[q.id]);
+  if(missing.length){
+    alert('Faltan por responder ' + missing.length + ' ítem(s): ' + missing.map(q=>q.id).join(', ') + '.');
+    return;
+  }
+  gradeAndRender(nombre, seccion);
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab-btn[data-tab="resultados"]').classList.add('active');
+  document.getElementById('panel-resultados').classList.add('active');
+  document.getElementById('resultados-actions').style.display='flex';
+  visitedTabs.add('resultados');
+  updateProgress();
+  renderMath();
+});
+
+function renderMath(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.body, {
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]
+    });
+  }
+}
+
+function gradeAndRender(nombre, seccion){
+  let correctCount=0;
+  const rows = questions.map(q=>{
+    const chosen = selected[q.id];
+    const isCorrect = chosen===q.correct;
+    if(isCorrect) correctCount++;
+    return {id:q.id, skill:q.skill, isCorrect};
+  });
+
+  const levels = {};
+  rubricRows.forEach(r=>{
+    const items = rows.filter(x=>x.skill===r.skill);
+    const nCorrect = items.filter(x=>x.isCorrect).length;
+    let lvl;
+    if(nCorrect===0) lvl=1;
+    else if(nCorrect===items.length) lvl=3;
+    else lvl=2;
+    levels[r.skill]=lvl;
+  });
+  const levelToPts = {0:0,1:1,2:2,3:4};
+  const maxPts = rubricRows.length*4;
+  let totalPtsScaled = 0;
+  rubricRows.forEach(r=>{ totalPtsScaled += levelToPts[levels[r.skill]]; });
+
+  const pct = Math.round((correctCount/questions.length)*100);
+  const R = 40, C = 2*Math.PI*R;
+  const dash = (pct/100)*C;
+
+  let html = `
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;padding:12px 16px;background:#F5F3FA;border:1px solid #ECE7F5;border-radius:12px;font-size:14px;">
+    <span><b>Estudiante:</b> ${nombre}</span>
+    <span><b>Sección:</b> ${seccion}</span>
+    <span><b>Tarea:</b> #3 — Monomios, polinomios y fórmulas notables</span>
+  </div>
+  <div class="score-hero">
+    <div class="score-ring">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="${R}" stroke="#4A4166" stroke-width="10" fill="none"/>
+        <circle cx="48" cy="48" r="${R}" stroke="#7C5CBF" stroke-width="10" fill="none"
+          stroke-dasharray="${dash} ${C}" stroke-linecap="round"/>
+      </svg>
+      <div class="pct">${pct}%</div>
+    </div>
+    <div class="score-text">
+      <h2>${correctCount} de ${questions.length} ítems correctos</h2>
+      <p>Puntaje según rúbrica: <b>${totalPtsScaled} / ${maxPts} puntos</b></p>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-bottom:10px"><b>Resultado por ítem</b></p>
+  <div class="itemres">
+    ${rows.map(x=>`<span class="itemchip ${x.isCorrect?'ok':'bad'}">Ítem ${x.id}: ${x.isCorrect?'✓ correcto':'✗ incorrecto'}</span>`).join('')}
+  </div>
+
+  ${(() => {
+    const weak = rubricRows.filter(r => levels[r.skill] < 3);
+    if(weak.length === 0){
+      return `<div class="feedback-box"><b>¡Excelente trabajo!</b> Acertó los 18 ítems: domina las operaciones con monomios y polinomios, las fórmulas notables, sus operaciones combinadas y el valor numérico.</div>`;
+    }
+    return `<p class="lead" style="margin-bottom:10px"><b>💡 Retroalimentación</b> — refuerce lo siguiente antes de continuar:</p>
+    ${weak.map(r => `<div class="feedback-box"><b>${skillShort[r.skill]}:</b> ${r.tip}</div>`).join('')}`;
+  })()}
+
+  <p class="lead" style="margin-bottom:10px"><b>Rúbrica evaluada</b> — el nivel obtenido en cada habilidad se resalta con un borde.</p>
+  <table class="rubric">
+    <thead><tr><th>Criterio / Indicador</th><th>0</th><th>1</th><th>2</th><th>4</th><th>Puntos obtenidos</th></tr></thead>
+    <tbody>
+    ${rubricRows.map(r=>`
+      <tr>
+        <td class="crit">${r.name}</td>
+        <td class="level0 ${levels[r.skill]===0?'achieved':''}">${r.d0}</td>
+        <td class="level1 ${levels[r.skill]===1?'achieved':''}">${r.d1}</td>
+        <td class="level2 ${levels[r.skill]===2?'achieved':''}">${r.d2}</td>
+        <td class="level3 ${levels[r.skill]===3?'achieved':''}">${r.d3}</td>
+        <td class="pts">${levelToPts[levels[r.skill]]}</td>
+      </tr>`).join('')}
+      <tr class="total-row"><td colspan="5" style="text-align:right;padding-right:14px;">Puntos obtenidos</td><td class="pts">${totalPtsScaled} / ${maxPts}</td></tr>
+    </tbody>
+  </table>
+  `;
+
+  document.getElementById('resultados-content').innerHTML = html;
+}
+
+/* ---------- static rubric tab ---------- */
+(function(){
+  const el = document.getElementById('rubrica-static');
+  el.innerHTML = `
+  <table class="rubric">
+    <thead><tr><th>Criterio / Indicador</th><th>0</th><th>1</th><th>2</th><th>4</th><th>Puntos</th></tr></thead>
+    <tbody>
+    ${rubricRows.map(r=>`
+      <tr>
+        <td class="crit">${r.name}</td>
+        <td>${r.d0}</td>
+        <td>${r.d1}</td>
+        <td>${r.d2}</td>
+        <td>${r.d3}</td>
+        <td class="pts">4</td>
+      </tr>`).join('')}
+      <tr class="total-row"><td colspan="5" style="text-align:right;padding-right:14px;">Valor total</td><td class="pts">24</td></tr>
+    </tbody>
+  </table>`;
+})();
+
+/* ---------- PDF export ---------- */
+document.getElementById('btn-pdf').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-pdf');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Generando PDF…';
+
+  const source = document.getElementById('resultados-content');
+  const prevWidth = source.style.width;
+  const prevMaxWidth = source.style.maxWidth;
+  source.style.width = '740px';
+  source.style.maxWidth = '740px';
+
+  try{
+    const canvas = await html2canvas(source, { scale:2, useCORS:true, backgroundColor:'#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+
+    const margin = 8;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth - margin*2;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+    heightLeft -= (pageHeight - margin*2);
+
+    while (heightLeft > 0){
+      position = margin - (imgHeight - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - margin*2);
+    }
+
+    pdf.save('resultado_tarea3_operaciones_combinadas.pdf');
+  }catch(err){
+    console.error(err);
+    alert('No se pudo generar el PDF. Intente nuevamente.');
+  }finally{
+    source.style.width = prevWidth;
+    source.style.maxWidth = prevMaxWidth;
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+window.addEventListener('load', renderMath);
+</script>
+</body>
+</html>
